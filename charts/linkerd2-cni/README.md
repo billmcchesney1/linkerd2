@@ -28,8 +28,8 @@ Kubernetes: `>=1.13.0-0`
 | createdByAnnotation | string | `"linkerd.io/created-by"` | Annotation label for the proxy create. Do not edit.  |
 | destCNIBinDir | string | `"/opt/cni/bin"` | Directory on the host where the CNI configuration will be placed |
 | destCNINetDir | string | `"/etc/cni/net.d"` | Directory on the host where the CNI plugin binaries reside  |
-| ignoreInboundPorts | string | `"25,443,587,3306,11211"` | Inbound ports the proxy should ignore - SMTP (25,587) server-first - HTTPS (443) opaque TLS - MYSQL (3306) server-first - Memcached (11211) clients do not issue any preamble, which breaks detection |
-| ignoreOutboundPorts | string | `"25,443,587,3306,11211"` | Outbound ports the proxy should ignore |
+| ignoreInboundPorts | string | `"443"` | Inbound ports the proxy should ignore - HTTPS (443) opaque TLS  |
+| ignoreOutboundPorts | string | `"443"` | Outbound ports the proxy should ignore |
 | imagePullSecrets | string | `nil` |  |
 | inboundProxyPort | int | `4143` | Inbound port for the proxy container |
 | installNamespace | bool | `true` | Whether to create the CNI plugin plane namespace or not  |

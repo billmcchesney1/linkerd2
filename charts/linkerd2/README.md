@@ -175,8 +175,8 @@ Kubernetes: `>=1.13.0-0`
 | global.proxy.uid | int | `2102` | User id under which the proxy runs |
 | global.proxy.waitBeforeExitSeconds | int | `0` | If set the proxy sidecar will stay alive for at least the given period before receiving SIGTERM signal from Kubernetes but no longer than pod's `terminationGracePeriodSeconds`. See [Lifecycle hooks](https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks) for more info on container lifecycle hooks. |
 | global.proxyInit.closeWaitTimeoutSecs | int | `0` |  |
-| global.proxyInit.ignoreInboundPorts | string | `"25,443,587,3306,11211"` | Default set of ports to skip via itpables: - SMTP (25,587) server-first - HTTPS (443) opaque TLS - MYSQL (3306) server-first - Memcached (11211) clients do not issue any preamble, which breaks detection |
-| global.proxyInit.ignoreOutboundPorts | string | `"25,443,587,3306,11211"` | Default set of ports to skip via itpables, same defaults as InboudPorts |
+| global.proxyInit.ignoreInboundPorts | string | `"443"` | Default set of ports to skip via itpables: - HTTPS (443) opaque TLS |
+| global.proxyInit.ignoreOutboundPorts | string | `"443"` | Default set of ports to skip via itpables, same defaults as InboundPorts |
 | global.proxyInit.image.name | string | `"ghcr.io/linkerd/proxy-init"` | Docker image for the proxy-init container |
 | global.proxyInit.image.pullPolicy | string | `"IfNotPresent"` | Pull policy for the proxy-init container Docker image |
 | global.proxyInit.image.version | string | `"v1.3.8"` | Tag for the proxy-init container Docker image |
