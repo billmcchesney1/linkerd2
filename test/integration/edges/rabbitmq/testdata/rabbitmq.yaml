@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: rabbitmq
+  spec:
+    replicas: 1
+    selector:
+      matchLabels:
+        app: rabbitmq
+    template:
+      metadata:
+        labels:
+          app: rabbitmq
+      spec:
+        containers:
+          - env:
+              - name: RABBITMQ_ERLANG_COOKIE
+                valueFrom:
+                  secretKeyRef:
+                    key: rabbitmq-erlang-cookie
+                    name: nfsaas-rabbitmq
+              - name: RABBITMQ_DEFAULT_USER
+                value: guest
+              - name: RABBITMQ_DEFAULT_PASS
+                value: guest
+              - name: RABBITMQ_DEFAULT_VHOST
+                value: /
+            image: rabbitmq:3-management
+            livenessProbe:
+              exec:
+                command:
+                  - rabbitmqctl
+                  - status
+            name: rabbitmq
+            ports:
+              - containerPort: 4369
+                name: epmd
+                protocol: TCP
+              - containerPort: 5672
+                name: amqp
+                protocol: TCP
+              - containerPort: 15672
+                name: http
+                protocol: TCP
+            readinessProbe:
+              exec:
+                command:
+                  - rabbitmqctl
+                  - status

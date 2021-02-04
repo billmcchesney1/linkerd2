@@ -8,7 +8,6 @@ import (
 	"github.com/streadway/amqp"
 	"os"
 	"testing"
-	"time"
 )
 
 var TestHelper *testutil.TestHelper
@@ -27,17 +26,10 @@ type mqResources struct {
 var defaultConnStr = "amqp://guest:guest@localhost:5672/"
 
 
-func validateMQResources(actual string, expected string, message string) error {
-	if actual != expected {
-		return fmt.Errorf("Expected %s '%s', got '%s'", message, expected, actual)
-	}
-	return nil
-}
-
 func RabbitMQAMQPConnection() (*amqp.Connection, error)  {
 	conn, err := amqp.Dial(defaultConnStr)
 	if err != nil {
-		return nil, fmt.Errorf("Could not connect to rabbitMQ %s", err)
+		return nil, fmt.Errorf("failed to dial rabbitMQ %s", err)
 	}
 	return conn, nil
 }
@@ -60,45 +52,20 @@ func TestRabbitMQWithQueuesAndMessage(t *testing.T) {
 
 
 	t.Run("Connect to Rabbitmq and create a queue", func(t *testing.T){
-		timeout := 40 * time.Second
-		err := TestHelper.RetryFor(timeout, func() error {
-
-			if err := RabbitMQCreateQueue(conn, qn); err != nil {
-				testutil.AnnotatedFatal(t, "Error connect to RabbitMQ and create a queue")
-			}
-			return nil
-
-		})
-		if err != nil {
-			testutil.AnnotatedFatal(t, fmt.Sprintf("timed-out connecting to MQ to create a queue (%s)", timeout), err)
+		if err := RabbitMQCreateQueue(conn, qn); err != nil {
+			testutil.AnnotatedFatal(t, "Error connect to RabbitMQ and create a queue", err)
 		}
 	})
 	t.Run("Publish a message to RabbitMQ", func(t *testing.T){
-		timeout := 40 * time.Second
-		err := TestHelper.RetryFor(timeout, func() error{
-			if err := RabbitMQPublishMessage(conn, qn); err != nil {
-				testutil.AnnotatedFatal(t, fmt.Sprintf("Error publish message to RabbitMQ"), err)
-			}
-			return nil
-		})
-		if err != nil {
-			testutil.AnnotatedFatal(t, fmt.Sprintf("timed-out connecting to MQ to publish a message (%s)", timeout), err)
+		if err := RabbitMQPublishMessage(conn, qn); err != nil {
+			testutil.AnnotatedFatal(t, fmt.Sprintf("Error publish message to RabbitMQ"), err)
 		}
 	})
 	t.Run("Consume a message from RabbitMQ", func(t *testing.T){
-		timeout := 40 * time.Second
-		err := TestHelper.RetryFor(timeout, func() error{
-			if err := RabbitMQPublishMessage(conn, qn); err != nil {
-				testutil.AnnotatedFatal(t, fmt.Sprintf("Error consuming message from RabbitMQ"), err)
-			}
-			return nil
-		})
-		if err != nil {
-			testutil.AnnotatedFatal(t, fmt.Sprintf("timed-out connecting to MQ to consume a message (%s)", timeout), err)
+		if err := RabbitMQConsumeMessage(conn, qn); err != nil {
+			testutil.AnnotatedFatal(t, fmt.Sprintf("Error consuming message from RabbitMQ"), err)
 		}
 	})
-
-
 }
 
 func RabbitMQCreateQueue(conn *amqp.Connection, m *mqResources) error {
@@ -109,14 +76,13 @@ func RabbitMQCreateQueue(conn *amqp.Connection, m *mqResources) error {
 
 	q, err := ch.QueueDeclare(m.queueName, false, false, false, false, nil)
 	if err != nil {
-		fmt.Errorf("fould not create RabbitMQ queue %s", err)
+		fmt.Errorf("failed to declare RabbitMQ queue %s", err)
 	}
 
-	if err := validateMQResources( m.queueName, q.Name, "queue name"); err != nil {
-		return fmt.Errorf("failed to create queue %s", m.queueName)
+	if m.queueName != q.Name {
+		return fmt.Errorf("expected queue name (%s) got (%s)", m.queueName, q.Name)
 	}
 	return nil
-
 }
 
 func  RabbitMQPublishMessage(conn *amqp.Connection, m *mqResources) error {
@@ -124,7 +90,7 @@ func  RabbitMQPublishMessage(conn *amqp.Connection, m *mqResources) error {
 	if err != nil {
 		fmt.Errorf("fould not open channel %s", err)
 	}
-	err = ch.Publish(
+	if err = ch.Publish(
 		"",
 		m.queueName,
 		false,
@@ -132,9 +98,12 @@ func  RabbitMQPublishMessage(conn *amqp.Connection, m *mqResources) error {
 		amqp.Publishing{
 			ContentType: "text/plain",
 			Body: []byte(m.messageBody),
-		})
-	if err != nil {
+		}); err != nil {
 		fmt.Errorf("failed to publish message %s", err)
+	}
+
+	if ch.Confirm(false); err != nil {
+		fmt.Errorf("message published  could not be confirmed %s", err)
 	}
 	result, _:= ch.QueueInspect(m.queueName)
 	fmt.Printf("%d and %d\n",result.Messages, m.expectedMessageCount)
@@ -160,10 +129,13 @@ func RabbitMQConsumeMessage(conn *amqp.Connection, m *mqResources) error{
 	)
 
 	if err != nil {
-		fmt.Errorf("failed to consume message %s", err)
+		fmt.Errorf("failed to register a consumer %s", err)
 	}
 	for d := range msgs {
-		validateMQResources( string(d.Body) , m.messageBody, "message body")
+		if string(d.Body) !=  m.messageBody {
+			fmt.Errorf("Expected message body %s got %s", d.Body, m.messageBody)
+		}
+		d.Ack(false)
 	}
 	return nil
 }
