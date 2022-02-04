@@ -41,7 +41,7 @@
     "@babel/preset-env": "7.9.5",
     "@babel/preset-react": "7.9.4",
     "@babel/runtime": "7.9.2",
-    "@lingui/cli": "2.9.2",
+    "@lingui/cli": "3.0.0",
     "@wdio/cli": "6.1.2",
     "@wdio/local-runner": "6.1.2",
     "@wdio/mocha-framework": "6.1.0",
