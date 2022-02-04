@@ -70,7 +70,7 @@
     "eslint-plugin-react-hooks": "3.0.0",
     "file-loader": "6.0.0",
     "history": "4.10.1",
-    "html-webpack-plugin": "4.2.0",
+    "html-webpack-plugin": "4.2.1",
     "jest": "25.4.0",
     "jest-dot-reporter": "1.0.14",
     "jest-enzyme": "7.1.2",
