@@ -16,7 +16,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/ghodss/yaml v1.0.0
 	github.com/go-openapi/spec v0.19.3
-	github.com/golang/protobuf v1.4.3
+	github.com/golang/protobuf v1.5.0
 	github.com/gorilla/websocket v1.4.0
 	github.com/grantae/certinfo v0.0.0-20170412194111-59d56a35515b
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
@@ -43,7 +43,7 @@ require (
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
 	golang.org/x/tools v0.0.0-20200616133436-c1934b75d054
 	google.golang.org/grpc v1.31.1
-	google.golang.org/protobuf v1.24.0
+	google.golang.org/protobuf v1.33.0
 	helm.sh/helm/v3 v3.4.1
 	k8s.io/api v0.19.3
 	k8s.io/apiextensions-apiserver v0.19.3
